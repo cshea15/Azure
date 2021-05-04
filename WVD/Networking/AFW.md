@@ -53,7 +53,7 @@ To configure the firewall, you will need to add firewall rules under the Network
         * Service Tags: WindowsVirtualDesktop
         * Destination Ports: 443
 
-![NetRules Diagram](../Images/netrule.png)
+![NetRules Diagram](./Images/netrule.png)
 
 #### Application Rule Setting
 * Settings: 
@@ -68,7 +68,7 @@ To configure the firewall, you will need to add firewall rules under the Network
         * Source: Is the IP Address space of your VNet for your WVD Session Host VMs
         * FQDN Tags: WindowsUpdate, WindowsDiagnostics, MicrosoftActivationProtection, WindowsVirtualDesktop
 
-![App Diagram](../Images/apprule.png)
+![App Diagram](./Images/apprule.png)
 
 
 ### UDR Configuration
