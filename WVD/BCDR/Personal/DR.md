@@ -24,11 +24,11 @@ The best thing about setting up Disaster Recovery with Windows Virtual Desktop i
    -  Choose if you want to use Availibility Zones and what zone you want to select for those VMs.
  
     **NOTE:** For Availbility Zones to work successfully, I would suggest group some of your VMs and replicate to different Zones. ie: Five VMs to Zone 1, Five to Zone 2 and Five to Zone 3. 
-![Source](../Images/source.PNG)
+![Source](../Images/source.png)
 
 - Under the Virtual Machine:
   - Select which VMs you want to replicate to the secondary location. 
-![Virtual Machines](../Images/vm.PNG)
+![Virtual Machines](../Images/vm.png)
  
 - Under the Replication settings:
   - Select your Target Location and confirm your Target Subscription is correct
@@ -47,8 +47,8 @@ The best thing about setting up Disaster Recovery with Windows Virtual Desktop i
    - Once the sync is completed you should see Test Failover as an option. This will simulate a failover without having to do a full failover and losing your VM. Your VM that you are replicating is still on. Once the Test Failover is complete turn off your primary VM and leave your failover VM on, you should see that your Session Host for that VM is still showing as Available. The Session Host will go Unavailable for 30 secs until the primary machine is completely off and then show Available. 
    - If you want to change some of the settings you can go into the replicated VM and change the Target settings under Compute and Network. 
 - In the images below you can see I have my failover VM running and my primary VM turned off and my Session Host is still Active. 
-![OnOffVMs](../Images/twovms.PNG)
-![SH](../Images/sh.PNG)
+![OnOffVMs](../Images/twovms.png)
+![SH](../Images/sh.png)
 
 **NOTE:** It does suggest using a seperate VNet for running Test Failover. The problem with that would be the testing Vnet won't have access to your domain controller, If you want to see the failover process than feel free to use a seperate testing VNet.
 
