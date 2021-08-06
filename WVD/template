@@ -16,7 +16,14 @@ New-AzResourceGroup -Name $ResourceGroupName -Location $Location
 
 # Create Virtual Network
 
-New-AzVirtualNetwork -Name $VirtualNetwork -ResourceGroupName Test-Rg -Location eastus -AddressPrefix "11.0.0.0/20" -Subnet $AVDSubnet
+New-AzVirtualNetwork `
+    -Name $VirtualNetwork `
+    -ResourceGroupName $ResourceGroupName `
+    -Location eastus  `
+    -AddressPrefix "11.0.0.0/20" `
+    -Subnet $AVDSubnet
+
+#Create HostPool
 
 
 
