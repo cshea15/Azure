@@ -1,0 +1,18 @@
+# Connect to Azure
+Connect-AzAccount
+
+# Set Parameters 
+$Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
+$ResourceGroupName = "Test-Rg"
+$Location + "East US"
+
+# Choose your Subscription
+Select-AzSubscription $Subscription
+
+# Create ResourceGroup
+New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Tag @{Empty=$null;App="Test";Name="Charles"}
+
+
+
+
+
