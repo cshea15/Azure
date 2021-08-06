@@ -4,15 +4,19 @@ Connect-AzAccount
 # Set Parameters 
 $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Test-Rg"
-$Location + "East US"
+$Location = "eastus"
+$VirtualNetwork = "AVD-Spoke"
+$AVDSubnet = "New-AzVirtualNetworkSubnetConfig -Name AVDSubnet -AddressPrefix "11.0.1.0/24""
+
 
 # Choose your Subscription
 Select-AzSubscription $Subscription
 
 # Create ResourceGroup
-New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Tag @{Empty=$null;App="Test";Name="Charles"}
+New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Tag @{App="Test";Name="Charles"}
 
-
-
+# Create Virtual Network
+New-AzVirtualNetwork -Name $VirtualNetwork -ResourceGroupName Test-Rg -Location eastus  
+-AddressPrefix "11.0.1.0/20" -Subnet $AVDSubnet
 
 
