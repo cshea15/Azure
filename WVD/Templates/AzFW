@@ -1,3 +1,6 @@
+# Description
+## Template will create a new firewall manager policy and add rules for AVD required URLS
+
 # Connect to Azure
 Connect-AzAccount
 
@@ -15,11 +18,11 @@ $firewallpolicy = "AVDFirewallPolicy"
 # Choose your Subscription
 Select-AzSubscription $Subscription
 
-#Create Route
+# Create Route
 
 # Associate to Subnet
 
-#Create Firewall Policy
+# Create Firewall Policy
 
 # Create Application Rule Collection Group
 
