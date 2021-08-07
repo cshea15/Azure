@@ -1,0 +1,31 @@
+# Connect to Azure
+Connect-AzAccount
+
+# Set Parameters 
+$Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
+$ResourceGroupName = "Network-Rg"
+$Location = "eastus"
+$AzFW = "Firewall"
+$AppRule1 = 
+$NetRule1 =
+$routeTableFW =
+$AVDSubnet = "WVD"
+$firewallpolicy = "AVDFirewallPolicy"
+
+# Choose your Subscription
+Select-AzSubscription $Subscription
+
+#Create Route
+
+# Associate to Subnet
+
+#Create Firewall Policy
+
+# Create Application Rule Collection Group
+
+# Create Application Rule
+
+# Create Network Rule Collection Group
+
+# Create Network Rule
+
