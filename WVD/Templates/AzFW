@@ -43,5 +43,6 @@ New-AzFirewallPolicy
  -ResourceGroupName $ResourceGroupName
 
 # Create Application Rule Collection Group
+$apprule1 =
 
 # Create Network Rule Collection Group
