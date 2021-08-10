@@ -1,5 +1,5 @@
 # Description
-## Template will create a new firewall manager policy and add rules for AVD required URLS
+## Template will create a new firewall manager policy and add rules for AVD required URLS.
 
 # Connect to Azure
 Connect-AzAccount
@@ -9,26 +9,40 @@ $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Network-Rg"
 $Location = "eastus"
 $AzFW = "Firewall"
-$AppRule1 = 
-$NetRule1 =
-$routeTableFW =
 $AVDSubnet = "WVD"
 $firewallpolicy = "AVDFirewallPolicy"
+$AzFwPrivateIP = "10.2.3.4"
 
 # Choose your Subscription
 Select-AzSubscription $Subscription
 
 # Create Route
+$routeTableFW = New-AzRouteTable `
+ -Name FwRouteTable `
+ -ResourceGroupName = $ResourceGroupName `
+ -Location = $Location `
+ -DisableBGPRoutePropagation
+
+Add-AzRouteConfig `
+ -Name "AVD-Route" `
+ -RouteTable $routeTableFW `
+ -AddressPrefix 0.0.0.0/0
+ -NextHopType "VirtualAppliance" `
+ -NextHopIpAddress $AzFwPrivateIP
+| Set-AzRouteTable
 
 # Associate to Subnet
+Set-AzVirtualNetworkSubnetConfig `
+  -VirtualNetwork $testVnet `
+  -Name $AVDSubnet `
+  -AddressPrefix 0.0.0.0/24 `
+  -RouteTable $routeTableFW | Set-AzVirtualNetwork
 
 # Create Firewall Policy
+New-AzFirewallPolicy 
+ -Name $firewallpolicy `
+ -ResourceGroupName $ResourceGroupName
 
 # Create Application Rule Collection Group
 
-# Create Application Rule
-
 # Create Network Rule Collection Group
-
-# Create Network Rule
-
