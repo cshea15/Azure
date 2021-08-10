@@ -18,7 +18,7 @@ Select-AzSubscription $Subscription
 
 # Create Route
 $routeTableFW = New-AzRouteTable `
- -Name FwRouteTable `
+ -Name "FwRouteTable" `
  -ResourceGroupName = $ResourceGroupName `
  -Location = $Location `
  -DisableBGPRoutePropagation
@@ -80,7 +80,7 @@ $netrule1 = New-AzFirewallNetworkRule `
   -DestinationPort "4040"
 
   New-AzFirewallNetworkRuleCollection `
-   -Name RC1 `
+   -Name "RC1" `
    -Priority 100 `
    -Rule $netrule1, $netrule2 `
    -ActionType "Allow"
