@@ -8,7 +8,6 @@ Connect-AzAccount
 $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Network-Rg"
 $Location = "eastus"
-$AzFW = "Firewall"
 $AVDSubnet = "WVD"
 $firewallpolicy = "AVDFirewallPolicy"
 $AzFwPrivateIP = "10.2.3.4"
