@@ -11,6 +11,7 @@ $Location = "eastus"
 $AVDSubnet = "WVD"
 $firewallpolicy = "AVDFirewallPolicy"
 $AzFwPrivateIP = "10.2.3.4"
+$fwsku = "Standard"
 
 # Choose your Subscription
 Select-AzSubscription $Subscription
@@ -25,9 +26,9 @@ $routeTableFW = New-AzRouteTable `
 Add-AzRouteConfig `
  -Name "AVD-Route" `
  -RouteTable $routeTableFW `
- -AddressPrefix 0.0.0.0/0
+ -AddressPrefix 0.0.0.0/0 `
  -NextHopType "VirtualAppliance" `
- -NextHopIpAddress $AzFwPrivateIP
+ -NextHopIpAddress $AzFwPrivateIP `
   Set-AzRouteTable
 
 # Associate to Subnet
@@ -38,11 +39,49 @@ Set-AzVirtualNetworkSubnetConfig `
   -RouteTable $routeTableFW | Set-AzVirtualNetwork
 
 # Create Firewall Policy
-New-AzFirewallPolicy 
+New-AzFirewallPolicy `
  -Name $firewallpolicy `
- -ResourceGroupName $ResourceGroupName
+ -ResourceGroupName $ResourceGroupName `
+ -SkuTier $fwsku
 
 # Create Application Rule Collection Group
-$apprule1 =
+$apprule1 = New-AzFirewallApplicationRule `
+ -Name "httpsRule" `
+ -Protocol "https:443" `
+ -TargetFqdn "*" `
+ -SourceAddress "10.0.0.0"
+
+ $apprule2 = New-AzFirewallApplicationRuleCollection `
+  -Name "" `
+  -Protocol "" `
+  -TargetFqdn "" `
+  -SourceAddress ""
+
+ New-AzFirewallApplicationRuleCollection `
+  -Name "AVDAppRuleCollection" `
+  -Priority 100 `
+  -Rule $apprule1, $apprule2 `
+  -ActionType "Allow"
 
 # Create Network Rule Collection Group
+$netrule1 = New-AzFirewallNetworkRule `
+ -Name "all-udp-traffic" `
+ -Description "Rule for all UDP traffic" `
+ -Protocol UDP -SourceAddress "*" `
+ -DestinationAddress "*" `
+ -DestinationPort "*"
+
+ $netrule2 = New-AzFirewallNetworkRule `
+  -Name "partial-tcp-rule" `
+  -Description "Rule for all TCP traffic from 10.0.0.0 to 60.1.5.0:4040" `
+  -Protocol TCP `
+  -SourceAddress "10.0.0.0" `
+  -DestinationAddress "60.1.5.0" 
+  -DestinationPort "4040"
+
+  New-AzFirewallNetworkRuleCollection `
+   -Name RC1 `
+   -Priority 100 `
+   -Rule $netrule1, $netrule2 `
+   -ActionType "Allow"
+  
