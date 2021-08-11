@@ -20,8 +20,8 @@ Select-AzSubscription $Subscription
 # Create Route
 $routeTableFW = New-AzRouteTable `
  -Name "FwRouteTable" `
- -ResourceGroupName = $ResourceGroupName `
- -Location = $Location `
+ -ResourceGroupName $ResourceGroupName `
+ -Location $Location `
  -DisableBGPRoutePropagation
 
 Add-AzRouteConfig `
@@ -29,15 +29,16 @@ Add-AzRouteConfig `
  -RouteTable $routeTableFW `
  -AddressPrefix 0.0.0.0/0 `
  -NextHopType "VirtualAppliance" `
- -NextHopIpAddress $AzFwPrivateIP `
-  Set-AzRouteTable
+ -NextHopIpAddress $AzFwPrivateIP
+#Set-AzRouteTable
 
 # Associate to Subnet
 Set-AzVirtualNetworkSubnetConfig `
-  -VirtualNetwork $avdVnet `
   -Name $AVDSubnet `
+  -VirtualNetwork $avdvnet `
   -AddressPrefix 10.2.0.0/24 `
-  -RouteTable $routeTableFW | Set-AzVirtualNetwork
+  -RouteTable $routeTableFW 
+  #| Set-AzVirtualNetwork
 
 # Create Firewall Policy
 New-AzFirewallPolicy `
