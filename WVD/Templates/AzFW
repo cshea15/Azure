@@ -8,6 +8,7 @@ Connect-AzAccount
 $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Network-Rg"
 $Location = "eastus"
+$avdvnet = "WVD-Hub"
 $AVDSubnet = "WVD"
 $firewallpolicy = "AVDFirewallPolicy"
 $AzFwPrivateIP = "10.2.3.4"
@@ -33,9 +34,9 @@ Add-AzRouteConfig `
 
 # Associate to Subnet
 Set-AzVirtualNetworkSubnetConfig `
-  -VirtualNetwork $testVnet `
+  -VirtualNetwork $avdVnet `
   -Name $AVDSubnet `
-  -AddressPrefix 0.0.0.0/24 `
+  -AddressPrefix 10.2.0.0/24 `
   -RouteTable $routeTableFW | Set-AzVirtualNetwork
 
 # Create Firewall Policy
@@ -46,16 +47,16 @@ New-AzFirewallPolicy `
 
 # Create Application Rule Collection Group
 $apprule1 = New-AzFirewallApplicationRule `
- -Name "httpsRule" `
+ -Name "fqdntags" `
  -Protocol "https:443" `
- -TargetFqdn "*" `
- -SourceAddress "10.0.0.0"
-
+ -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
+ -SourceAddress "10.2.0.0/24"
+ 
  $apprule2 = New-AzFirewallApplicationRuleCollection `
-  -Name "" `
-  -Protocol "" `
-  -TargetFqdn "" `
-  -SourceAddress ""
+  -Name "kmsfqdn" `
+  -Protocol "1688" `
+  -TargetFqdn "kms.core.windows.net" `
+  -SourceAddress "10.2.0.0/24"
 
  New-AzFirewallApplicationRuleCollection `
   -Name "AVDAppRuleCollection" `
@@ -65,23 +66,30 @@ $apprule1 = New-AzFirewallApplicationRule `
 
 # Create Network Rule Collection Group
 $netrule1 = New-AzFirewallNetworkRule `
- -Name "all-udp-traffic" `
- -Description "Rule for all UDP traffic" `
- -Protocol UDP -SourceAddress "*" `
- -DestinationAddress "*" `
- -DestinationPort "*"
+ -Name "Port 80 Traffice" `
+ -Description "Traffic for metadata and session host health monitoring"  `
+ -Protocol TCP -SourceAddress 10.2.0.0/24 `
+ -DestinationAddress 168.254.169.254,168.63.129.16 `
+ -DestinationPort "80"
 
  $netrule2 = New-AzFirewallNetworkRule `
-  -Name "partial-tcp-rule" `
-  -Description "Rule for all TCP traffic from 10.0.0.0 to 60.1.5.0:4040" `
-  -Protocol TCP `
-  -SourceAddress "10.0.0.0" `
-  -DestinationAddress "60.1.5.0" 
-  -DestinationPort "4040"
+  -Name "AVD" `
+  -Description "Sending AVD and Azure traffice" `
+  -Protocol TCP -SourceAddress 10.2.0.0/24 `
+  -DestinationAddress AzureCloud,WindowsVirtualDesktop `
+  -DestinationPort "443"
+
+$netrule3 = New-AzFirewallNetworkRule `
+  -Name "DNS" `
+  -Description "Route DNS Traffic" `
+  -Protocol TCP,UDP `
+  -SourceAddress 10.2.0.0/24 `
+  -DestinationAddress "*" 
+  -DestinationPort "53"
 
   New-AzFirewallNetworkRuleCollection `
    -Name "RC1" `
    -Priority 100 `
-   -Rule $netrule1, $netrule2 `
+   -Rule $netrule1, $netrule2, $netrule3 `
    -ActionType "Allow"
   
