@@ -33,12 +33,18 @@ Add-AzRouteConfig `
 #Set-AzRouteTable
 
 # Associate to Subnet
+$virtualNetwork = Get-AzVirtualNetwork `
+ -Name $avdvnet `
+ -ResourceGroupName $ResourceGroupName
+ 
+$avdsubnetprefix = ($virtualnetwork.Subnets | where-object -property name -match $avdsubnet).AddressPrefix
+
 Set-AzVirtualNetworkSubnetConfig `
   -Name $AVDSubnet `
-  -VirtualNetwork $avdvnet `
-  -AddressPrefix 10.2.0.0/24 `
-  -RouteTable $routeTableFW 
-  #| Set-AzVirtualNetwork
+  -AddressPrefix $avdsubnetprefix `
+  -VirtualNetwork $virtualNetwork `
+  -RouteTable $routeTableFW `
+| Set-AzVirtualNetwork
 
 # Create Firewall Policy
 New-AzFirewallPolicy `
