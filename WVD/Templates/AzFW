@@ -50,17 +50,17 @@ $apprule1 = New-AzFirewallApplicationRule `
  -Name "fqdntags" `
  -Protocol "https:443" `
  -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
- -SourceAddress "10.2.0.0/24"
+ -SourceAddress 10.2.0.0/24
  
  $apprule2 = New-AzFirewallApplicationRuleCollection `
   -Name "kmsfqdn" `
-  -Protocol "1688" `
+  -Protocol "https:1688" `
   -TargetFqdn "kms.core.windows.net" `
-  -SourceAddress "10.2.0.0/24"
+  -SourceAddress 10.2.0.0/24
 
  New-AzFirewallApplicationRuleCollection `
   -Name "AVDAppRuleCollection" `
-  -Priority 100 `
+  -Priority 102 `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
