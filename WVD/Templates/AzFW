@@ -84,7 +84,7 @@ $netrule3 = New-AzFirewallNetworkRule `
   -Description "Route DNS Traffic" `
   -Protocol TCP,UDP `
   -SourceAddress 10.2.0.0/24 `
-  -DestinationAddress "*" 
+  -DestinationAddress "*" `
   -DestinationPort "53"
 
   New-AzFirewallNetworkRuleCollection `
