@@ -50,7 +50,9 @@ Set-AzVirtualNetworkSubnetConfig `
 New-AzFirewallPolicy `
  -Name $firewallpolicy `
  -ResourceGroupName $ResourceGroupName `
- -SkuTier $fwsku
+ -Location $Location
+ -SkuTier
+
 
 # Create Application Rule Collection Group
 $apprule1 = New-AzFirewallApplicationRule `
