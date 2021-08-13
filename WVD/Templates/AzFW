@@ -73,7 +73,7 @@ $AppRuleCollection = New-AzFirewallApplicationRuleCollection `
 
  $firewallpolicy.ApplicationRuleCollections.Add($AppRuleCollection)
 
- Set-AzFirewallPolicy -Name $firewallpolicy
+ Set-AzFirewallPolicy -InputObject $firewallpolicy
 
 
 # Create Network Rule Collection Group
@@ -107,4 +107,4 @@ $netrule3 = New-AzFirewallNetworkRule `
   
  $firewallpolicy.NetworkRuleCollections.Add($NetRuleCollection)
 
- Set-AzFirewallPolicy -Name $firewallpolicy
+ Set-AzFirewallPolicy -InputObject $firewallpolicy
