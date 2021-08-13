@@ -73,7 +73,7 @@ $apprule1 = New-AzFirewallApplicationRule `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
- $avdfw.ApplicationRuleCollections/Add($AppRuleCollection)
+ $avdfw.ApplicationRuleCollections.Add($AppRuleCollection)
 
  Set-AzFirewall -AzureFirewall $avdfw  
 
