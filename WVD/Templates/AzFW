@@ -10,8 +10,6 @@ $ResourceGroupName = "Network-Rg"
 $Location = "eastus"
 $avdvnet = "WVD-Hub"
 $AVDSubnet = "WVD"
-$avdfw = "avdfw"
-$firewallpolicy = "AVDFirewallPolicy"
 $AzFwPrivateIP = "10.2.3.4"
 $fwsku = "Standard"
 
@@ -48,8 +46,8 @@ Set-AzVirtualNetworkSubnetConfig `
 | Set-AzVirtualNetwork
 
 # Create Firewall Policy
-New-AzFirewallPolicy `
- -Name $firewallpolicy `
+$firewallpolicy = New-AzFirewallPolicy `
+ -Name AVDFWPolicy `
  -ResourceGroupName $ResourceGroupName `
  -Location $Location `
  -SkuTier $fwsku
@@ -57,24 +55,25 @@ New-AzFirewallPolicy `
 # Create Application Rule Collection Group
 $apprule1 = New-AzFirewallApplicationRule `
  -Name "fqdntags" `
- -SourceAddress 10.2.0.0/24 `
- -Protocol "https:443" `
- -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService
-  
+ -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
+ -SourceAddress 10.2.0.0/24
+ #-Protocol "https" 
+
 $apprule2 = New-AzFirewallApplicationRule `
   -Name "kmsfqdn" `
   -SourceAddress 10.2.0.0/24 `
   -Protocol "https:1688" `
   -TargetFqdn "kms.core.windows.net"
 
-New-AzFirewallApplicationRuleCollection `
+$AppRuleCollection = New-AzFirewallApplicationRuleCollection `
   -Name "AVDAppRuleCollection" `
   -Priority 102 `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
- #$avdfw.ApplicationRuleCollections.Add($AppRuleCollection)
- #Set-AzFirewallPolicy -Name $firewallpolicy
+ $firewallpolicy.ApplicationRuleCollections.Add($AppRuleCollection)
+
+ Set-AzFirewallPolicy -Name $firewallpolicy
 
 
 # Create Network Rule Collection Group
@@ -106,6 +105,6 @@ $netrule3 = New-AzFirewallNetworkRule `
    -Rule $netrule1, $netrule2, $netrule3 `
    -ActionType "Allow"
   
- $avdfw.NetworkRuleCollections.Add($NetRuleCollection)
+ $firewallpolicy.NetworkRuleCollections.Add($NetRuleCollection)
 
  Set-AzFirewallPolicy -Name $firewallpolicy
