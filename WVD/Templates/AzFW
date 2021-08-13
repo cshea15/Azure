@@ -50,9 +50,9 @@ Set-AzVirtualNetworkSubnetConfig `
 New-AzFirewallPolicy `
  -Name $firewallpolicy `
  -ResourceGroupName $ResourceGroupName `
- -Location $Location
+ -Location $Location `
+ -SkuTier $fwsku
   
-
 # Create Application Rule Collection Group
 $apprule1 = New-AzFirewallApplicationRule `
  -Name "fqdntags" `
