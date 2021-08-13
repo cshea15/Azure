@@ -63,9 +63,10 @@ $apprule1 = New-AzFirewallApplicationRule `
   
  $apprule2 = New-AzFirewallApplicationRule `
   -Name "kmsfqdn" `
+  -SourceAddress 10.2.0.0/24 `
   -Protocol "https:1688" `
-  -TargetFqdn "kms.core.windows.net" `
-  -SourceAddress 10.2.0.0/24
+  -TargetFqdn "kms.core.windows.net"
+  
 
  $AppRuleCollection = New-AzFirewallApplicationRuleCollection `
   -Name "AVDAppRuleCollection" `
