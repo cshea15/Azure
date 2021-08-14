@@ -56,7 +56,7 @@ $firewallpolicy = New-AzFirewallPolicy `
 $apprule1 = New-AzFirewallPolicyApplicationRule `
  -Name "fqdntags" `
  -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
- -SourceAddress 10.2.0.0/24
+ -SourceAddress 10.2.0.0/24 `
  #-Protocol "https" 
 
 $apprule2 = New-AzFirewallPolicyApplicationRule `
@@ -65,41 +65,39 @@ $apprule2 = New-AzFirewallPolicyApplicationRule `
   -Protocol "https:1688" `
   -TargetFqdn "kms.core.windows.net"
 
-$AppRuleCollection = New-AzFirewallPolicyApplicationRuleCollection `
+$AppRuleCollection = New-AzFirewallPolicyFilterRuleCollection `
   -Name "AVDAppRuleCollection" `
   -Priority 102 `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
 $AppRuleCollectionGroup = New-AzFirewallPolicyRuleCollectionGroup `
- -Name "AppRuleCollectionGroup" `
- -ResourceGroupName $ResourceGroupName `
- -Priority 105 `
- -RuleCollection $AppRuleCollection `
- -FirewallPolicyObject $firewallpolicy
- 
- 
- $firewallpolicy.RuleCollectionGroups.Add($AppRuleCollectionGroup)
-
- Set-AzFirewallPolicy -InputObject $firewallpolicy
+  -Name "AppRuleCollectionGroup" `
+  -ResourceGroupName $ResourceGroupName `
+  -Priority 105 `
+  -RuleCollection $AppRuleCollection `
+  -FirewallPolicyName $firewallpolicy #why didnt the parameter work??
+   
+# $firewallpolicy.RuleCollectionGroups.Add($AppRuleCollectionGroup)
+ # Set-AzFirewallPolicy -InputObject $firewallpolicy
 
 
 # Create Network Rule Collection Group
-$netrule1 = New-AzFirewallNetworkRule `
+$netrule1 = New-AzFirewallPolicyNetworkRule `
  -Name "Port 80 Traffice" `
  -Description "Traffic for metadata and session host health monitoring"  `
  -Protocol TCP -SourceAddress 10.2.0.0/24 `
  -DestinationAddress 168.254.169.254,168.63.129.16 `
  -DestinationPort "80"
 
- $netrule2 = New-AzFirewallNetworkRule `
+ $netrule2 = New-AzFirewallPolicyNetworkRule `
   -Name "AVD" `
   -Description "Sending AVD and Azure traffice" `
   -Protocol TCP -SourceAddress 10.2.0.0/24 `
   -DestinationAddress AzureCloud,WindowsVirtualDesktop `
   -DestinationPort "443"
 
-$netrule3 = New-AzFirewallNetworkRule `
+$netrule3 = New-AzFirewallPolicyNetworkRule `
   -Name "DNS" `
   -Description "Route DNS Traffic" `
   -Protocol TCP,UDP `
@@ -107,12 +105,18 @@ $netrule3 = New-AzFirewallNetworkRule `
   -DestinationAddress "*" `
   -DestinationPort "53"
 
- $NetRuleCollection = New-AzFirewallNetworkRuleCollection `
-   -Name "RC1" `
+ $NetRuleCollection = New-AzFirewallPolicyFilterRuleCollection `
+   -Name "NetRuleCollection" `
    -Priority 100 `
    -Rule $netrule1, $netrule2, $netrule3 `
    -ActionType "Allow"
-  
- $firewallpolicy.NetworkRuleCollections.Add($NetRuleCollection)
 
- Set-AzFirewallPolicy -InputObject $firewallpolicy
+ $netrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup `
+  -Name "NetRuleApplicationGroup" `
+  -ResourceGroupName $ResourceGroupName `
+  -Priority 100 `
+  -RuleCollection $NetRuleCollection `
+  -FirewallPolicyName $firewallpolicy
+  
+#$firewallpolicy.RuleCollectionGroups($netrulecollectiongroup)
+#Set-AzFirewallPolicy -InputObject $firewallpolicy
