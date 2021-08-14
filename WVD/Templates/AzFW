@@ -18,7 +18,7 @@ Select-AzSubscription $Subscription
 
 # Create Route
 $routeTableFW = New-AzRouteTable `
- -Name "FwRouteTable" `
+ -Name "AvdFwRT" `
  -ResourceGroupName $ResourceGroupName `
  -Location $Location `
  -DisableBGPRoutePropagation
@@ -36,7 +36,7 @@ $virtualNetwork = Get-AzVirtualNetwork `
  -Name $avdvnet `
  -ResourceGroupName $ResourceGroupName
  
-$avdsubnetprefix = ($virtualnetwork.Subnets | where-object -property name -match $avdsubnet).AddressPrefix
+#$avdsubnetprefix = ($virtualnetwork.Subnets | where-object -property name -match $avdsubnet).AddressPrefix
 
 Set-AzVirtualNetworkSubnetConfig `
   -Name $AVDSubnet `
@@ -71,7 +71,7 @@ $AppRuleCollection = New-AzFirewallPolicyFilterRuleCollection `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
-$AppRuleCollectionGroup = New-AzFirewallPolicyRuleCollectionGroup `
+New-AzFirewallPolicyRuleCollectionGroup `
   -Name "AppRuleCollectionGroup" `
   -ResourceGroupName $ResourceGroupName `
   -Priority 105 `
@@ -84,7 +84,7 @@ $AppRuleCollectionGroup = New-AzFirewallPolicyRuleCollectionGroup `
 
 # Create Network Rule Collection Group
 $netrule1 = New-AzFirewallPolicyNetworkRule `
- -Name "Port 80 Traffice" `
+ -Name "MetaData/Service Health" `
  -Description "Traffic for metadata and session host health monitoring"  `
  -Protocol TCP -SourceAddress 10.2.0.0/24 `
  -DestinationAddress 168.254.169.254,168.63.129.16 `
@@ -111,7 +111,7 @@ $netrule3 = New-AzFirewallPolicyNetworkRule `
    -Rule $netrule1, $netrule2, $netrule3 `
    -ActionType "Allow"
 
- $netrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup `
+New-AzFirewallPolicyRuleCollectionGroup `
   -Name "NetRuleApplicationGroup" `
   -ResourceGroupName $ResourceGroupName `
   -Priority 100 `
