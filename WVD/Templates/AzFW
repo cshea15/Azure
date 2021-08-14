@@ -43,7 +43,7 @@ Set-AzVirtualNetworkSubnetConfig `
   -AddressPrefix $avdsubnetprefix `
   -VirtualNetwork $virtualNetwork `
   -RouteTable $routeTableFW `
-| Set-AzVirtualNetwork
+#| Set-AzVirtualNetwork
 
 # Create Firewall Policy
 $firewallpolicy = New-AzFirewallPolicy `
