@@ -6,15 +6,6 @@ Connect-AzAccount
 
 # Set Parameters 
 
-[CmdletBinding()]
-param (
-    [Parameter(Mandatory=$true)]
-    [string]$RGName,
-    [Parameter(Mandatory=$true)]
-    [string]$SubscriptionID,
-    [Parameter(Mandatory=$true)]
-    [string]$Location
-    )
 
 $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Network-Rg"
@@ -24,19 +15,70 @@ $AVDSubnet = "WVD"
 $AzFwPrivateIP = "10.2.3.4"
 $fwsku = "Standard"
 
+#[CmdletBinding()] 
+
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$ResourceGroupName,
+    [Parameter(Mandatory=$true)]
+    [string]$SubscriptionID,
+    [Parameter(Mandatory=$true)]
+    [string]$Location,
+    [Parameter(Mandatory=$true)]
+    [string]$avdvnet,
+    [Parameter(Mandatory=$true)]
+    [string]$avdsubnet,
+    [Parameter(Mandatory=$true)]
+    [string]$fwsku,
+    [Parameter(Mandatory=$true)]
+    [string]$AzFwPrivateIP,
+    [Parameter(Mandatory=$true)]
+    [string]$firewallpolicyname,
+    [Parameter(Mandatory=$true)]
+    [string]$AVDFWRT,
+    [Parameter(Mandatory=$true)]
+    [string]$RouteAVDName,
+    [Parameter(Mandatory=$true)]
+    [string]$apprule1name,
+    [Parameter(Mandatory=$true)]
+    [string]$apprule2name,
+    [Parameter(Mandatory=$true)]
+    [string]$AppRuleCollectionName,
+    [Parameter(Mandatory=$true)]
+    [string]$AppRuleCollectionPriority,
+    [Parameter(Mandatory=$true)]
+    [string]$AppRuleCollectionGroupName,
+    [Parameter(Mandatory=$true)]
+    [string]$AppRuleCollectionGroupPriority,
+    [Parameter(Mandatory=$true)]
+    [string]$netrule1name,
+    [Parameter(Mandatory=$true)]
+    [string]$netrule2name,
+    [Parameter(Mandatory=$true)]
+    [string]$netrule3name,
+    [Parameter(Mandatory=$true)]
+    [string]$NetRuleCollectionName,
+    [Parameter(Mandatory=$true)]
+    [string]$netrulecollectionpriority,
+    [Parameter(Mandatory=$true)]
+    [string]$netrulecollectiongroupname,
+    [Parameter(Mandatory=$true)]
+    [string]$netrulecollectiongrouppriority
+    )
+
 
 # Choose your Subscription
 Select-AzSubscription $Subscription
 
 # Create Route
 $routeTableFW = New-AzRouteTable `
- -Name "AvdFwRT" `
+ -Name $AVDFWRT `
  -ResourceGroupName $ResourceGroupName `
  -Location $Location `
  -DisableBGPRoutePropagation
 
 Add-AzRouteConfig `
- -Name "AVD-Route" `
+ -Name $RouteAVDName `
  -RouteTable $routeTableFW `
  -AddressPrefix 0.0.0.0/0 `
  -NextHopType "VirtualAppliance" `
@@ -54,81 +96,79 @@ Set-AzVirtualNetworkSubnetConfig `
   -Name $AVDSubnet `
   -AddressPrefix $avdsubnetprefix `
   -VirtualNetwork $virtualNetwork `
-  -RouteTable $routeTableFW `
+  -RouteTable $routeTableFW
+
 #| Set-AzVirtualNetwork
 
 # Create Firewall Policy
 $firewallpolicy = New-AzFirewallPolicy `
- -Name AVDFWPolicy `
+ -Name $firewallpolicyname `
  -ResourceGroupName $ResourceGroupName `
  -Location $Location `
  -SkuTier $fwsku
   
 # Create Application Rule Collection Group
 $apprule1 = New-AzFirewallPolicyApplicationRule `
- -Name "fqdntags" `
+ -Name $apprule1name `
  -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
  -Protocol "https:443" `
- -SourceAddress 10.2.0.0/24
-
- #-Protocol "https" 
+ -SourceAddress $avdsubnetprefix
 
 $apprule2 = New-AzFirewallPolicyApplicationRule `
-  -Name "kmsfqdn" `
-  -SourceAddress 10.2.0.0/24 `
+  -Name $apprule2name `
+  -SourceAddress $avdsubnetprefix `
   -Protocol "https:1688" `
   -TargetFqdn "kms.core.windows.net"
 
 $AppRuleCollection = New-AzFirewallPolicyFilterRuleCollection `
-  -Name "AVDAppRuleCollection" `
-  -Priority 102 `
+  -Name $AppRuleCollectionName `
+  -Priority $AppRuleCollectionPriority `
   -Rule $apprule1, $apprule2 `
   -ActionType "Allow"
 
 New-AzFirewallPolicyRuleCollectionGroup `
-  -Name "AppRuleCollectionGroup" `
+  -Name $AppRuleCollectionGroupName `
   -ResourceGroupName $ResourceGroupName `
-  -Priority 105 `
+  -Priority $AppRuleCollectionGroupPriority `
   -RuleCollection $AppRuleCollection `
   -FirewallPolicyName $firewallpolicy.Name 
    
 #$firewallpolicy.RuleCollectionGroups.Add($AppRuleCollectionGroup)
 #Set-AzFirewallPolicy -InputObject $firewallpolicy
 
-
 # Create Network Rule Collection Group
 $netrule1 = New-AzFirewallPolicyNetworkRule `
- -Name "MetaData/Service Health" `
+ -Name $netrule1name `
  -Description "Traffic for metadata and session host health monitoring"  `
- -Protocol TCP -SourceAddress 10.2.0.0/24 `
+ -Protocol TCP -SourceAddress $avdsubnetprefix `
  -DestinationAddress 168.254.169.254,168.63.129.16 `
  -DestinationPort "80"
 
  $netrule2 = New-AzFirewallPolicyNetworkRule `
-  -Name "AVD" `
+  -Name $netrule2name `
   -Description "Sending AVD and Azure traffic" `
-  -Protocol TCP -SourceAddress 10.2.0.0/24 `
+  -Protocol TCP -SourceAddress $avdsubnetprefix `
   -DestinationAddress AzureCloud,WindowsVirtualDesktop `
   -DestinationPort "443"
 
 $netrule3 = New-AzFirewallPolicyNetworkRule `
-  -Name "DNS" `
+  -Name $netrule3name `
   -Description "Route DNS Traffic" `
   -Protocol TCP,UDP `
-  -SourceAddress 10.2.0.0/24 `
+  -SourceAddress $avdsubnetprefix `
   -DestinationAddress "*" `
   -DestinationPort "53"
 
  $NetRuleCollection = New-AzFirewallPolicyFilterRuleCollection `
-   -Name "NetRuleCollection" `
-   -Priority 100 `
+   -Name $NetRuleCollectionName `
+   -Priority $netrulecollectionpriority `
    -Rule $netrule1, $netrule2, $netrule3 `
    -ActionType "Allow"
 
 New-AzFirewallPolicyRuleCollectionGroup `
-  -Name "NetRuleApplicationGroup" `
+  -Name $NetRuleApplicationGroupname `
   -ResourceGroupName $ResourceGroupName `
-  -Priority 100 `
+  -Priority $netrulecollectiongrouppriority `
   -RuleCollection $NetRuleCollection `
   -FirewallPolicyName $firewallpolicy.Name  
   
