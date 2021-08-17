@@ -36,7 +36,7 @@ $virtualNetwork = Get-AzVirtualNetwork `
  -Name $avdvnet `
  -ResourceGroupName $ResourceGroupName
  
-#$avdsubnetprefix = ($virtualnetwork.Subnets | where-object -property name -match $avdsubnet).AddressPrefix
+$avdsubnetprefix = ($virtualnetwork.Subnets | where-object -property name -match $avdsubnet).AddressPrefix
 
 Set-AzVirtualNetworkSubnetConfig `
   -Name $AVDSubnet `
@@ -56,7 +56,9 @@ $firewallpolicy = New-AzFirewallPolicy `
 $apprule1 = New-AzFirewallPolicyApplicationRule `
  -Name "fqdntags" `
  -FqdnTag WindowsVirtualDesktop,WindowsUpdate,WindowsDiagnostics,MicrosoftActiveProtectionService `
- -SourceAddress 10.2.0.0/24 `
+ -Protocol "https:443" `
+ -SourceAddress 10.2.0.0/24
+
  #-Protocol "https" 
 
 $apprule2 = New-AzFirewallPolicyApplicationRule `
@@ -76,10 +78,10 @@ New-AzFirewallPolicyRuleCollectionGroup `
   -ResourceGroupName $ResourceGroupName `
   -Priority 105 `
   -RuleCollection $AppRuleCollection `
-  -FirewallPolicyName $firewallpolicy #why didnt the parameter work??
+  -FirewallPolicyName $firewallpolicy.Name 
    
-# $firewallpolicy.RuleCollectionGroups.Add($AppRuleCollectionGroup)
- # Set-AzFirewallPolicy -InputObject $firewallpolicy
+#$firewallpolicy.RuleCollectionGroups.Add($AppRuleCollectionGroup)
+#Set-AzFirewallPolicy -InputObject $firewallpolicy
 
 
 # Create Network Rule Collection Group
@@ -92,7 +94,7 @@ $netrule1 = New-AzFirewallPolicyNetworkRule `
 
  $netrule2 = New-AzFirewallPolicyNetworkRule `
   -Name "AVD" `
-  -Description "Sending AVD and Azure traffice" `
+  -Description "Sending AVD and Azure traffic" `
   -Protocol TCP -SourceAddress 10.2.0.0/24 `
   -DestinationAddress AzureCloud,WindowsVirtualDesktop `
   -DestinationPort "443"
@@ -116,7 +118,7 @@ New-AzFirewallPolicyRuleCollectionGroup `
   -ResourceGroupName $ResourceGroupName `
   -Priority 100 `
   -RuleCollection $NetRuleCollection `
-  -FirewallPolicyName $firewallpolicy
+  -FirewallPolicyName $firewallpolicy.Name  
   
 #$firewallpolicy.RuleCollectionGroups($netrulecollectiongroup)
 #Set-AzFirewallPolicy -InputObject $firewallpolicy
