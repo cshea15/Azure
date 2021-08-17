@@ -5,6 +5,17 @@
 Connect-AzAccount
 
 # Set Parameters 
+
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$RGName,
+    [Parameter(Mandatory=$true)]
+    [string]$SubscriptionID,
+    [Parameter(Mandatory=$true)]
+    [string]$Location
+    )
+
 $Subscription = "9e087dff-9c5b-4650-96ee-19cfe5269c5d"
 $ResourceGroupName = "Network-Rg"
 $Location = "eastus"
@@ -12,6 +23,7 @@ $avdvnet = "WVD-Hub"
 $AVDSubnet = "WVD"
 $AzFwPrivateIP = "10.2.3.4"
 $fwsku = "Standard"
+
 
 # Choose your Subscription
 Select-AzSubscription $Subscription
